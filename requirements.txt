@@ -1,11 +1,10 @@
-geopandas
 streamlit
+geopandas
 matplotlib
 shapely
 requests
 fiona
 pyproj
 rtree
-json
 pandas
 numpy
