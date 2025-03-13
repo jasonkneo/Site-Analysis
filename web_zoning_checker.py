@@ -9,15 +9,14 @@ from geopy.geocoders import Nominatim
 # Define constants
 ZONING_URL = "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/Zoning_opendata/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson"
 OVERLAY_URLS = {
-    "Character": "CHARACTER_OVERLAY_GEOJSON_URL",
-    "Flood": "FLOOD_OVERLAY_GEOJSON_URL",
+    "Character": "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/Dwelling_house_character_overlay/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson",
+    "Flood": "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/Flood_Awareness_Flood_Risk_Overall/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson",
     "Overland Flow": "OVERLAND_FLOW_OVERLAY_GEOJSON_URL",
-    "Traditional Building Character": "TBC_OVERLAY_GEOJSON_URL",
-    "Bushfire": "BUSHFIRE_OVERLAY_GEOJSON_URL",
+    "Traditional Building Character": "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/Traditional_building_character_overlay/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson",
+    "Bushfire": "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/Bushfire_overlay/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson",
     "Heritage": "HERITAGE_OVERLAY_GEOJSON_URL",
-    "Pre-1911 Buildings": "PRE1911_OVERLAY_GEOJSON_URL",
-    "Transport Noise Corridors": "TRANSPORT_NOISE_OVERLAY_GEOJSON_URL"
-}
+    "Pre-1911 Buildings": "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/Pre1911_building_overlay/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson",
+    }
 GEOJSON_PATH = "zoning_data.geojson"
 OVERLAY_PATHS = {key: f"{key.lower().replace(' ', '_')}_overlay.geojson" for key in OVERLAY_URLS.keys()}
 
