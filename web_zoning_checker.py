@@ -21,7 +21,8 @@ OVERLAY_URLS = {
 GEOJSON_PATH = "zoning_data.geojson"
 OVERLAY_PATHS = {key: f"{key.lower().replace(' ', '_')}_overlay.geojson" for key in OVERLAY_URLS.keys()}
 
-# Rest of the code remains unchanged
+# Limit overlays to load initially to prevent overload
+OVERLAYS_TO_LOAD = ["Character", "Flood", "Overland Flow"]
 
 def geocode_address(address):
     """Convert an address to latitude and longitude."""
@@ -48,24 +49,43 @@ def download_geojson(url, path):
 
 def load_zoning_data():
     """Download and load zoning data."""
+    st.info("Downloading zoning data... (Please wait)")
     zoning_path = download_geojson(ZONING_URL, GEOJSON_PATH)
+    
     if zoning_path:
-        gdf = gpd.read_file(zoning_path)
-        gdf = gdf.to_crs("EPSG:4326")
-        gdf = gdf[gdf.is_valid]
-        st.write("### Available Columns in Zoning Data:")
-        st.write(gdf.columns.tolist())
-        return gdf
-    return None
+        try:
+            st.info("Loading zoning data into memory...")
+            gdf = gpd.read_file(zoning_path)
+            gdf = gdf.to_crs("EPSG:4326")
+            gdf = gdf[gdf.is_valid]
+            st.success("Zoning data loaded successfully!")
+            return gdf
+        except Exception as e:
+            st.error(f"Error loading zoning data: {e}")
+            return None
+    else:
+        st.error("Zoning data download failed.")
+        return None
 
 def load_overlay_data():
-    """Download and load all overlay data."""
+    """Download and load a limited number of overlay data."""
     overlay_gdfs = {}
-    for overlay, url in OVERLAY_URLS.items():
-        path = download_geojson(url, OVERLAY_PATHS[overlay])
-        if path:
-            overlay_gdfs[overlay] = gpd.read_file(path)
-            overlay_gdfs[overlay] = overlay_gdfs[overlay].to_crs("EPSG:4326")
+    
+    for overlay in OVERLAYS_TO_LOAD:
+        if overlay in OVERLAY_URLS:
+            st.info(f"Downloading {overlay} overlay data... (Please wait)")
+            path = download_geojson(OVERLAY_URLS[overlay], OVERLAY_PATHS[overlay])
+            
+            if path:
+                try:
+                    st.info(f"Loading {overlay} overlay data...")
+                    overlay_gdfs[overlay] = gpd.read_file(path)
+                    overlay_gdfs[overlay] = overlay_gdfs[overlay].to_crs("EPSG:4326")
+                    st.success(f"{overlay} overlay loaded successfully!")
+                except Exception as e:
+                    st.error(f"Error loading {overlay} overlay: {e}")
+            else:
+                st.warning(f"Could not download {overlay} overlay.")
     return overlay_gdfs
 
 # Rest of the existing code remains the same
