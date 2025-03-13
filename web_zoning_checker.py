@@ -11,17 +11,34 @@ GEOJSON_PATH = "zoning_data.geojson"
 
 def load_zoning_data():
     """Download and load a subset of zoning data to improve performance."""
+    st.info("Checking zoning data...")
+
     if not os.path.exists(GEOJSON_PATH):
-        st.info("Downloading zoning data (this may take a while)...")
-        response = requests.get(ZONING_URL, stream=True)
-        if response.status_code == 200:
-            with open(GEOJSON_PATH, 'wb') as file:
-                for chunk in response.iter_content(chunk_size=8192):  # Increased chunk size for speed
-                    file.write(chunk)
-            st.success("Zoning data downloaded successfully.")
-        else:
-            st.error("Failed to download zoning data. Try again later.")
+        st.warning("Downloading zoning data... (May take a few minutes)")
+        try:
+            response = requests.get(ZONING_URL, stream=True, timeout=30)  # Set timeout to prevent freezing
+            if response.status_code == 200:
+                with open(GEOJSON_PATH, 'wb') as file:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        file.write(chunk)
+                st.success("Zoning data downloaded successfully.")
+            else:
+                st.error("Failed to download zoning data.")
+                return None
+        except requests.exceptions.RequestException as e:
+            st.error(f"Network error: {e}")
             return None
+
+    st.info("Loading zoning data...")
+
+    try:
+        gdf = gpd.read_file(GEOJSON_PATH, rows=1000)  # Load first 1000 rows for performance
+        gdf = gdf.to_crs("EPSG:4326")
+        gdf = gdf[gdf.is_valid]
+        return gdf
+    except Exception as e:
+        st.error(f"Error loading GeoJSON file: {e}")
+        return None
 
     st.info("Loading zoning data...")
     gdf = gpd.read_file(GEOJSON_PATH, rows=1000)  # Load only 1000 rows to reduce memory usage
