@@ -9,3 +9,4 @@ rtree
 pandas
 numpy
 fpdf
+geopy
