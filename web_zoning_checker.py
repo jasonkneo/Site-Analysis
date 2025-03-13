@@ -4,10 +4,20 @@ import matplotlib.pyplot as plt
 from shapely.geometry import Point
 import requests
 import os
+from geopy.geocoders import Nominatim
 
 # Define constants
 ZONING_URL = "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/Zoning_opendata/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson"
 GEOJSON_PATH = "zoning_data.geojson"
+
+def geocode_address(address):
+    """Convert an address to latitude and longitude."""
+    geolocator = Nominatim(user_agent="zoning_checker")
+    location = geolocator.geocode(address)
+    if location:
+        return location.longitude, location.latitude
+    else:
+        return None, None
 
 def load_zoning_data():
     """Download and load zoning data from the new ArcGIS source."""
@@ -70,8 +80,18 @@ if __name__ == "__main__":
         else:
             st.success("Zoning data loaded successfully.")
 
-            lon = st.number_input("Enter Longitude:", value=153.0251, format="%.6f")
-            lat = st.number_input("Enter Latitude:", value=-27.4698, format="%.6f")
+            address = st.text_input("Enter Address (or leave blank to use coordinates):")
+            lon, lat = None, None
+            
+            if address:
+                st.info("Geocoding address...")
+                lon, lat = geocode_address(address)
+                if lon is None or lat is None:
+                    st.error("Could not find coordinates for the given address.")
+                    st.stop()
+            else:
+                lon = st.number_input("Enter Longitude:", value=153.0251, format="%.6f")
+                lat = st.number_input("Enter Latitude:", value=-27.4698, format="%.6f")
 
             if st.button("Check Zoning"):
                 st.info("Checking zoning data...")
